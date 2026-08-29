@@ -12,7 +12,9 @@
 ## 📦 Установка
 
 1. Откройте раздел **[Releases](../../releases)** → скачайте `Tower-v1.0.apk`
-   (готовый файл лежит и в репозитории: [`release/Tower-v1.0.apk`](release/Tower-v1.0.apk)).
+   (после первой сборки готовый файл лежит и в репозитории:
+   [`release/Tower-v1.0.apk`](release/Tower-v1.0.apk)).
+   Если APK ещё нет — один раз активируйте автосборку, см. 👇 **«Автосборка APK»**.
 2. Разрешите установку из неизвестных источников для браузера/файлового менеджера.
 3. Установите APK и откройте Tower.
 4. Нажмите **«Выдать»** для пункта *«Показ поверх других приложений»* — это главный доступ,
@@ -122,6 +124,33 @@ Android не даёт стороннему приложению менять с�
 Root не нужен. Интернет нужен только для загрузки самих видео.
 
 ---
+
+## 🚀 Автосборка APK (GitHub Actions) — включить один раз
+
+Workflow лежит в файле [`ci/apk.yml`](ci/apk.yml). GitHub Actions выполняет workflow
+только из каталога `.github/workflows/`, а приложение Arena не имеет права создавать
+файлы в этом каталоге — поэтому файл нужно **один раз** положить вручную:
+
+1. Откройте [`ci/apk.yml`](ci/apk.yml) на GitHub и нажмите **Raw**, скопируйте содержимое.
+2. Откройте
+   **[New file at `.github/workflows/apk.yml`](https://github.com/yyar36236-alt/Tower/new/arena/01a04ca2-tower?filename=.github%2Fworkflows%2Fapk.yml)**
+   (путь уже подставлен), вставьте скопированный текст.
+3. **Commit changes → Commit directly to `arena/01a04ca2-tower`.**
+
+Всё: этот же push запустит сборку. Дальше каждый push в ветку будет автоматически:
+
+* собирать `Tower-v1.0.apk` (release, подписанный) и `Tower-debug.apk`;
+* складывать их в артефакт `Tower-APK`;
+* обновлять релиз **v1.0**;
+* класть `release/Tower-v1.0.apk` прямо в репозиторий.
+
+Альтернатива — собрать локально:
+
+```bash
+gradle wrapper --gradle-version 8.7     # один раз, чтобы появился ./gradlew
+./gradlew assembleDebug                 # debug APK
+./gradlew assembleRelease               # release APK
+```
 
 ## 🛠 Сборка из исходников
 

@@ -1,9 +1,18 @@
+# =====================================================================
+#  Tower — автоматическая сборка APK
+#  СКОПИРУЙТЕ ЭТОТ ФАЙЛ В: .github/workflows/apk.yml
+#  (GitHub Actions запускает workflow только из каталога .github/workflows)
+# =====================================================================
 name: Build APK
 
 on:
   push:
     branches: ['**']
   workflow_dispatch:
+
+concurrency:
+  group: tower-build
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -36,7 +45,7 @@ jobs:
           mkdir -p keystore
           if [ -n "$KS_BASE64" ]; then
             echo "$KS_BASE64" | base64 -d > keystore/tower.jks
-            echo "keystore: из секретов"
+            echo "keystore: взят из секретов репозитория"
           else
             keytool -genkeypair -v -keystore keystore/tower.jks -storetype PKCS12 \
               -storepass tower2024 -keypass tower2024 -alias tower \
@@ -51,17 +60,16 @@ jobs:
           TOWER_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD || 'tower2024' }}
           TOWER_KEY_ALIAS: tower
           TOWER_KEY_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD || 'tower2024' }}
-        run: |
-          gradle --no-daemon --stacktrace assembleDebug assembleRelease
+        run: gradle --no-daemon --stacktrace assembleDebug assembleRelease
 
-      - name: Собрать APK в папку out
+      - name: Сложить APK в out/
         run: |
           mkdir -p out
           cp app/build/outputs/apk/debug/app-debug.apk out/Tower-debug.apk
           cp app/build/outputs/apk/release/app-release.apk out/Tower-v1.0.apk
           ls -lh out
 
-      - name: Артефакт
+      - name: Артефакт сборки
         uses: actions/upload-artifact@v4
         with:
           name: Tower-APK
@@ -69,30 +77,32 @@ jobs:
           if-no-files-found: error
 
       - name: Положить APK в репозиторий
-        if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[apk]')
         run: |
           mkdir -p release
           cp out/Tower-v1.0.apk release/Tower-v1.0.apk
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config pull.rebase true
           git add -f release/Tower-v1.0.apk
           if git diff --cached --quiet; then
             echo "APK не изменился — коммит не нужен"
           else
-            git commit -m "chore: обновить APK сборки [skip ci]"
-            for i in 1 2 3; do
-              git pull --rebase origin "${GITHUB_REF_NAME}" && break || sleep 5
+            git commit -m "chore: APK сборки Tower v1.0 [skip ci]"
+            for i in 1 2 3 4 5; do
+              git pull --rebase origin "$GITHUB_REF_NAME" && break || sleep 5
             done
-            git push origin HEAD:"${GITHUB_REF_NAME}"
+            git push origin HEAD:"$GITHUB_REF_NAME"
           fi
 
       - name: Релиз GitHub
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release view v1.0 --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1 && \
-            gh release upload v1.0 out/Tower-v1.0.apk out/Tower-debug.apk --clobber --repo "${GITHUB_REPOSITORY}" || \
+          if gh release view v1.0 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload v1.0 out/Tower-v1.0.apk out/Tower-debug.apk --clobber --repo "$GITHUB_REPOSITORY"
+          else
             gh release create v1.0 out/Tower-v1.0.apk out/Tower-debug.apk \
               --title "Tower v1.0 — плавающая панель видео" \
               --notes "Плавающая панель: 30 функций в 6 разделах, скорость 2X/3X/4X/5X/10X, пропуск рекламы, запись экрана, усиление звука." \
-              --repo "${GITHUB_REPOSITORY}"
+              --repo "$GITHUB_REPOSITORY"
+          fi
