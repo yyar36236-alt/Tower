@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Tower Accessibility Service.
+  Используется ТОЛЬКО для того, чтобы плавающая панель:
+    * всегда оставалась видимой поверх любых приложений и системных окон;
+    * автоматически восстанавливалась, если система выгрузила процесс;
+    * могла рисоваться системным слоем TYPE_ACCESSIBILITY_OVERLAY.
+  Сервис НЕ читает содержимое экрана, НЕ собирает текст и ничего не отправляет.
+-->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/a11y_description"
+    android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagDefault"
+    android:canRetrieveWindowContent="false"
+    android:canRequestTouchExplorationMode="false"
+    android:canPerformGestures="false"
+    android:notificationTimeout="1000"
+    android:settingsActivity="com.tower.app.ui.SettingsActivity" />
