@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Tower</string>
+    <string name="app_subtitle">Плавающая панель управления видео</string>
+    <string name="title_settings">Настройки Tower</string>
+    <string name="a11y_description">Позволяет панели Tower оставаться поверх всех приложений и не выгружаться системой. Tower не читает текст на экране.</string>
+
+    <string name="notif_title">Tower — панель активна</string>
+    <string name="notif_text">Плавающее меню работает поверх приложений</string>
+    <string name="notif_action_open">Открыть</string>
+    <string name="notif_action_stop">Остановить</string>
+    <string name="notif_recording">Идёт запись экрана…</string>
+    <string name="notif_capture_title">Разрешите захват экрана</string>
+    <string name="notif_capture_text">Нажмите, чтобы подтвердить запись/снимок экрана</string>
+
+    <string name="need_overlay">Нужно разрешение «Поверх других окон»</string>
+    <string name="need_overlay_desc">Без него плавающее меню не сможет отображаться поверх других приложений.</string>
+    <string name="grant">Выдать</string>
+    <string name="granted">Выдано</string>
+    <string name="start_panel">Запустить панель</string>
+    <string name="stop_panel">Остановить панель</string>
+    <string name="all_functions">Все 30 функций</string>
+</resources>
